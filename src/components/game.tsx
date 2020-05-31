@@ -1,5 +1,5 @@
-import React, { useState, useReducer, useRef } from 'react'
-import * as heroes from 'superheroes'
+import React, { useReducer, useRef, useEffect } from 'react'
+import axios from 'axios'
 
 import Pendu from './pendu'
 import Word from './word'
@@ -11,7 +11,7 @@ interface GameState {
 }
 
 const DEFAULT_GAME: GameState = {
-  word: heroes.random().toLowerCase(),
+  word: '',
   history: [],
   errors: 0
 }
@@ -30,15 +30,18 @@ function isLoose (errors: number): boolean {
   return errors >= 6
 }
 
-function reducer (state: GameState, action: { type: string, try: string | undefined }): GameState {
+const ActionType = { success: 'onGood', reject: 'onFailed', fetch: 'fetchWord' }
+function reducer (state: GameState, action: { type: string, value: string }): GameState {
   const slice = state.history.slice()
-  slice.push(action.try !== undefined ? action.try : '')
+  slice.push(action.value)
   
   switch (action.type) {
-    case 'onFailed':
+    case ActionType.reject:
       return { ...state, errors: state.errors + 1, history: slice }
-    case 'onGood':
+    case ActionType.success:
       return { ...state, history: slice }
+    case ActionType.fetch: 
+      return { ...DEFAULT_GAME, word: action.value }
     default: throw new Error()
   }
 }
@@ -48,13 +51,21 @@ function reducer (state: GameState, action: { type: string, try: string | undefi
 */
 export default function Game (): JSX.Element {
   const [state, dispatch] = useReducer(reducer, DEFAULT_GAME)
+
+  useEffect(() => {
+    const id: number = Math.floor(Math.random() * (151 - 1 + 1) + 1)
+    axios.get(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(({ data }) => {
+      dispatch({ type: ActionType.fetch, value: data.name })
+    }).catch(console.error)
+  }, [/* AFTER CHANGE WHEN GAME_FULL_STATE IS UPDATED (LOOSE FOR EXAMPLE) */])
+
   const input = useRef<HTMLInputElement>(null)
 
   function handleSubmit(event: React.MouseEvent<HTMLInputElement, MouseEvent>): void {
     event.preventDefault()
     if (input.current === null) return 
     const value = input.current.value
-    dispatch({ type: (!state.word.split('').includes(value) ? 'onFailed' : 'onGood'), try: value })
+    dispatch({ type: (!state.word.split('').includes(value) ? ActionType.reject : ActionType.success), value })
     input.current.value = ''
   }
 
