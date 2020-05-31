@@ -53,9 +53,6 @@ function reducer (state: GameState, action: { type: string, value: any }): GameS
   }
 }
 
-/*
-  avoir un state ? GAME_INIT, GAME_PROGESS, GAMe_WIN ? 
-*/
 export default function Game (): JSX.Element {
   const [state, dispatch] = useReducer(reducer, DEFAULT_GAME)
 
