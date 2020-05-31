@@ -30,43 +30,38 @@ function isLoose (errors: number): boolean {
   return errors >= 6
 }
 
+function reducer (state: GameState, action: { type: string, try: string | undefined }): GameState {
+  const slice = state.history.slice()
+  slice.push(action.try !== undefined ? action.try : '')
+  
+  switch (action.type) {
+    case 'onFailed':
+      return { ...state, errors: state.errors + 1, history: slice }
+    case 'onGood':
+      return { ...state, history: slice }
+    default: throw new Error()
+  }
+}
+
 /*
-  useReducer pour le state, 
   call api avec useEffect (api pokemon) + avoir un state ? GAME_INIT, GAME_PROGESS, GAMe_WIN ? 
 */
 export default function Game (): JSX.Element {
-  const [data, setData] = useState(DEFAULT_GAME)
+  const [state, dispatch] = useReducer(reducer, DEFAULT_GAME)
   const input = useRef<HTMLInputElement>(null)
 
   function handleSubmit(event: React.MouseEvent<HTMLInputElement, MouseEvent>): void {
     event.preventDefault()
-    if (input.current === null) { return }
-
+    if (input.current === null) return 
     const value = input.current.value
-    const old = data.history.slice()
-
-    old.push(value)
-    setData({ word: data.word, history: old, errors: data.errors })
-
-    if (!data.word.split('').includes(value)) {
-      setData({ word: data.word, history: old, errors: data.errors + 1 })
-    }
-
-    if (isLoose(data.errors)) {
-      alert('You loose')
-    }
-
-    if (isActualWinned(data.word, old)) {
-      alert('Winned !')
-    }
-
+    dispatch({ type: (!state.word.split('').includes(value) ? 'onFailed' : 'onGood'), try: value })
     input.current.value = ''
   }
 
   return (
     <div>
-      <p>Find the word: [solution: {data.word}]</p>
-      <Word letters={data.word.split('')} history={data.history}/>
+      <p>Find the word: [solution: {state.word}]</p>
+      <Word letters={state.word.split('')} history={state.history}/>
 
       <p>Find:</p>
       <form>
@@ -79,8 +74,8 @@ export default function Game (): JSX.Element {
         />
       </form>
 
-      <p>History: {data.history.join(' ')}</p>
-      <Pendu errors={data.errors} />
+      <p>History: {state.history.join(' ')}</p>
+      <Pendu errors={state.errors} />
     </div>
   )
 }
