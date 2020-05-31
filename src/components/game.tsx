@@ -72,7 +72,7 @@ export default function Game (): JSX.Element {
 
   function handleSubmit(event: React.MouseEvent<HTMLInputElement, MouseEvent>): void {
     event.preventDefault()
-    if (input.current === null) return
+    if (input.current === null || Number(input.current.value) || input.current.value.length > 1) return
     const value = input.current.value
     dispatch({ type: (!state.word.split('').includes(value) ? ActionType.reject : ActionType.success), value })
     input.current.value = ''
