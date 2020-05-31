@@ -5,23 +5,28 @@ import Letter from './letter.component'
 
 interface GameState {
   word: string,
-  history: string[]
+  history: string[],
+  errors: number
 }
 
 const DEFAULT_GAME: GameState = {
   word: heroes.random().toLowerCase(),
-  history: []
+  history: [],
+  errors: 0
 }
 
 function isActualWinned (actual: string, history: string[]): boolean {
   let isWin = true
   for (const letter of actual.split('')) {
-    console.log(`Letter: ${letter}, include: ${history.includes(letter)}, history: ${history}`)
     if (!history.includes(letter)) {
       isWin = false
     }
   }
   return isWin
+}
+
+function isLoose (errors: number): boolean {
+  return errors >= 2
 }
 
 export default function Game (): JSX.Element {
@@ -32,14 +37,24 @@ export default function Game (): JSX.Element {
 
     const element = document.getElementById('letter') as HTMLInputElement
     const old = data.history.slice()
+
     old.push(element.value)
-    setData({ word: data.word, history: old } as GameState)
+    setData({ word: data.word, history: old, errors: data.errors } as GameState)
     
-    element.value = ''
+    console.log(data.word)
+    if (!data.word.split('').includes(element.value)) {
+      setData({ word: data.word, history: old, errors: data.errors + 1 } as GameState)
+    }
     
-    if (isActualWinned(data.word, data.history)) {
+    if (isLoose(data.errors)) {
+      alert('You loose')
+    }
+
+    if (isActualWinned(data.word, old)) {
       alert('Winned !')
     }
+
+    element.value = ''
   }
 
   return (
@@ -62,6 +77,7 @@ export default function Game (): JSX.Element {
       </form>
       
       <p>History: {data.history.join(' ')}</p>
+      <p>Nombre d'erreurs: {data.errors}</p>
     </div>
   )
 }
