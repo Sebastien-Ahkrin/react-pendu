@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import * as heroes from 'superheroes'
 
 import Letter from './letter.component'
+import Pendu from './pendu.component'
 
 interface GameState {
   word: string,
@@ -77,7 +78,8 @@ export default function Game (): JSX.Element {
       </form>
       
       <p>History: {data.history.join(' ')}</p>
-      <p>Nombre d'erreurs: {data.errors}</p>
+
+      <Pendu errors={data.errors} />
     </div>
   )
 }
