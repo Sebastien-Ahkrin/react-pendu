@@ -2,6 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
 
-import Game from './components/game.component'
+import Game from './components/game'
 
 ReactDOM.render(<Game/>, document.getElementById('root'))
