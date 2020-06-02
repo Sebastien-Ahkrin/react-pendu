@@ -58,7 +58,7 @@ export default function Game (): JSX.Element {
 
   useEffect(() => {
     if (state.progress === FullGameState.start) {
-      const id: number = Math.floor(Math.random() * (151 - 1 + 1) + 1)
+      const id: number = Math.floor(Math.random() * 151 + 1)
       axios.get(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(({ data }) => {
         dispatch({ type: ActionType.fetch, value: data.name })
       }).catch(console.error)
